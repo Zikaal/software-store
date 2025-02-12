@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Software Store</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="cart.html">Cart 🛒</a></li>
+                <li><a href="profile.html">User 👤</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h2>Available Products</h2>
+        <div id="products"></div>
+    </main>
+    
+    <section>
+        <h2>Manage Products</h2>
+        <!-- Форма для создания нового товара -->
+        <h3>Add Product</h3>
+        <form id="productForm">
+            <input type="text" id="productName" placeholder="Product Name" required>
+            <input type="number" id="productPrice" placeholder="Product Price" required>
+            <input type="url" id="productImage" placeholder="Product Image URL" required>
+            <input type="url" id="productUrl" placeholder="Product URL" required>
+            <button type="button" onclick="createProduct()">Create</button>
+        </form>
+        
+        <!-- Форма для обновления товара -->
+<h3>Update Product</h3>
+<form id="updateForm">
+    <input type="text" id="updateProductName" placeholder="Product Name">
+    <input type="number" id="updateProductPrice" placeholder="Product Price">
+    <input type="url" id="updateProductImage" placeholder="Product Image URL">
+    <input type="url" id="updateProductUrl" placeholder="Product URL" required>
+    <button type="button" onclick="updateProduct()">Update</button>
+</form>
+
+
+        <button onclick="readProducts()">Refresh List</button>
+    </section>
+
+    <script src="app.js"></script>
+    <script src="cart.js"></script>
+</body>
+</html>
