@@ -1,5 +1,8 @@
 # Software Store API
 
+# Zinetov Alikhan 
+# Asanov Daniyal
+
 ## Overview
 This project is a **Software Store API** built with **Node.js, Express, and MongoDB**. It allows users to register, log in, browse software products, add them to their cart, and manage orders.
 
