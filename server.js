@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcrypt"); 
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
@@ -19,56 +20,50 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true, index: true },
     password: { type: String, required: true },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
     avatar: { type: String, default: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMwAAADACAMAAAB/Pny7AAAAMFBMVEXk5ueutLfb3t+nrrHn6eqrsbTh4+S7wMPT1tixt7rKztDBxsi3vL/q7O3Y293Q09Wdj+FKAAAFPklEQVR4nO2c25LbIAxADRZgrv7/vy042SabOyBH8g7npdP2xWckQBDQNA0Gg8FgMBgMBoPBYDAYDAaDwWAwGAwGg92BzKRlQevtL0cFQMvFOe/NhnduSfqQPtlk8SZYdY0Nxi86HswH4uKDFUrcUoR8OlJ4skoQD0zOPsKG5TDRick+E/kvZNMhdECb+Y1KsZmNZm8DsKp3YfkZPSv1x74BtP8gLGeYBwdS+NxlGzl8bT5OsUuqLRNXHVensuk4pmtOg0uGpQ24FpViQ/3l98Da6CLEyi00sNhmGcFsTgMZmgbMhrLM1hvf7lJWT+rP/8Vas1Y+sGE0CYDsictmwyfRwPTKqBCpJc7A0pdkW2i4zM+xW6VAbXEiuv7AlCKNRaIBgkrGUnsU4to7+s9wCA101DHXqEBtUqYyHBfBoeAEj+WiPLmM7qgwb2SCJHaBFWnIZCx1nkFXufwb5WldJt1dll3JGNo8gxTQXHKe0W45O3b+D1C0gwbajpeeyRDv0RDHf5kBNKWLRBz/ZQYg3XAmg+giRJCEMriTmaA9QYOEt/7Ty+CVzBtqIZXBHP9Fhs6l/LqEKjP/JRnayCCnGW1k/tSYwZ7NxjqDJoN2ArBhKcuZXGhiutDWZpP+S1sAzPOMsjmjlcHdaRJvm3t+Mb+Hss7M9PxkfkdIpC6ohwDE47/8bIbmUm440cpg1gCB/NoJoC2byhBnGWqe0f8OCBIrz2gLsxMRK88MvQvCxZkzxCvmiYhzEBg4uOTSGeWGBvm8fCJilDRsrjVNCLeaeMRlwtgIzPRrzIXOn2mUZROYTOqMDPV1ht90JRrxDvOOnpMN8ssMt0D77QYG1fIdrRto+vs/j2jbpjF93dRUcSrBoPB/CDTY8Llqfkt1lcakVH5M9E9fAd+jBP1FxpfA+nFwVGC2Vt4D8rPg5LBwHfpXwLSYt881lfJ8X2j+AvRi5lc6SpmF7yx2C+jk1ROf/O8+8StgXqNXc++j5jnQ/qLUCkzJ2zlT2meUP2d7lJHyEIhxksvqnFsXOcVDdGd4CfyH+ksa2b5cn5HnJjonzv95DPKn5u9PKSeX9yYEW6bibeGxIRjv3ZpSVpu4GxUPmYpEKPOWul87T1OBsiY7LUlyNdpE1hwL+2yB+S2VlXKcXJL8ki5CFjFBPAjGS6WT0MRolotRuq0rU4XHlVAeS3n5YXGiCVG70pWp69xMWOvpWwRBRLtzrqwj7a8VJyc+GO0f68yGbIuTt2GIJmedQNPzSL7es7Qyi0V/txgt9fAuKptOWL94xllUKg5h6lFh/dZGFKR724yt10aY9RuFAUwO98bsMx0vd19Howy7ZtiVjnX7LjsQ/d4ZdmUjwp7BAY38Kuutzn5nnrB8KcMuzH6fNQfAdVWTbahdLqFXtS7EtBH4z1BAftIdcxebeUVONXjftHRHHdxOezF9fehfgzoNxJUwLgWFZxNX0rig2sBCHBdEG9KxfwHlbn1X60JMEK4+fdZ9+SsgvOJGaV6Gguq9ko79RLYL1dehEiT5pHzN3DUJ9LdhxKXnJjdOtz9Eum7Z8oqL6GmDGJkl2UbjJQJIDF2UaQsN0lMSbJrmgIjaIAsN1fQAitu0/INtqGqQXy3j0dLUEfdxPCKq/m0qm8r/nvqdDW5/PFTq3w7g9pPApfbCfc4y6k9+Tm3rQFb7mFuq+wag9sbApvIwHbdxITZz1aBhPWRKq/qawLAsmC/UDRqMTv97UrfScNsv32BrZDgvmQVVJWNm3lR125HMqVs1gTdVLoPBYDAYDAZH4R8eaVEbhZaf7QAAAABJRU5ErkJggg==" }
 }, { collection: "users" });
 
 const User = mongoose.model("User", UserSchema);
 
-// 📌 Регистрация (Signup)
-app.post("/signup", async (req, res) => {
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Access denied' });
+
     try {
-        const { username, email, password } = req.body;
-        if (!username || !email || !password) {
-            return res.status(400).json({ error: "All fields are required" });
-        }
-
-        // Хешируем пароль перед сохранением
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ username, email, password: hashedPassword });
-        await user.save();
-
-        res.status(201).json({ message: "User registered successfully!" });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
     } catch (err) {
-        console.error("Signup error:", err);
-        res.status(500).json({ error: "Error registering user" });
+        res.status(400).json({ error: 'Invalid token' });
     }
+}
+
+function isAdmin(req, res, next) {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access only' });
+    }
+    next();
+}
+
+app.post("/signup", async (req, res) => {
+    const { username, email, password, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, email, password: hashedPassword, role });
+    await user.save();
+    res.status(201).json({ message: 'User created' });
 });
 
-// 📌 Вход (Login) - без JWT
 app.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        console.log("📌 Login request received for email:", email);
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            console.log("❌ User not found");
-            return res.status(404).json({ error: "User not found" });
-        }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
-        console.log("✅ User found, checking password...");
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            console.log("❌ Invalid password");
-            return res.status(401).json({ error: "Invalid email or password" });
-        }
-
-        console.log("✅ Password correct, logging in...");
-        res.json({ userId: user._id, username: user.username, email: user.email, avatar: user.avatar });
-    } catch (err) {
-        console.error("❌ Login error:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token, role: user.role, userId: user._id });
 });
 
 
@@ -101,7 +96,7 @@ const ProductSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", ProductSchema);
 
 // 📌 Добавить товар (Create)
-app.post("/product", async (req, res) => {
+app.post("/product", authenticate, isAdmin,  async (req, res) => {
     try {
         let { name, price, image_url, url } = req.body;
         console.log("Received new product:", req.body);
@@ -140,7 +135,7 @@ app.get("/product", async (req, res) => {
 });
 
 // 📌 Обновить товар по URL (Update)
-app.put("/product", async (req, res) => {
+app.put("/product",authenticate, isAdmin,  async (req, res) => {
     try {
         let { name, price, image_url, url } = req.body;
 
@@ -173,7 +168,7 @@ app.put("/product", async (req, res) => {
 
 
 // 📌 Удалить товар (Delete)
-app.delete("/product/:id", async (req, res) => {
+app.delete("/product/:id",authenticate, isAdmin,  async (req, res) => {
     try {
         const deletedProduct = await Product.findByIdAndDelete(req.params.id);
         if (!deletedProduct) {
@@ -189,7 +184,7 @@ app.delete("/product/:id", async (req, res) => {
 const ObjectId = mongoose.Types.ObjectId;
 
 const CartSchema = new mongoose.Schema({
-    userId: { type: ObjectId, ref: "User", required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     products: [{
         productId: { type: ObjectId, ref: "Product" },
         name: String,
@@ -272,13 +267,5 @@ app.delete("/cart/:userId/:productId", async (req, res) => {
 });
 
 // 📌 Запуск сервера
-const PORT = process.env.PORT || 5000;
-
-console.log("🔍 Available Routes:");
-app._router.stack.forEach((r) => {
-    if (r.route && r.route.path) {
-        console.log(`✅ ${r.route.path}`);
-    }
-});
-
+const PORT = 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

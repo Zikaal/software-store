@@ -23,7 +23,7 @@
         <div id="products"></div>
     </main>
     
-    <section>
+    <section id="adminSection" style="display: none;">
         <h2>Manage Products</h2>
         <!-- Форма для создания нового товара -->
         <h3>Add Product</h3>
@@ -34,17 +34,16 @@
             <input type="url" id="productUrl" placeholder="Product URL" required>
             <button type="button" onclick="createProduct()">Create</button>
         </form>
-        
-        <!-- Форма для обновления товара -->
-<h3>Update Product</h3>
-<form id="updateForm">
-    <input type="text" id="updateProductName" placeholder="Product Name">
-    <input type="number" id="updateProductPrice" placeholder="Product Price">
-    <input type="url" id="updateProductImage" placeholder="Product Image URL">
-    <input type="url" id="updateProductUrl" placeholder="Product URL" required>
-    <button type="button" onclick="updateProduct()">Update</button>
-</form>
 
+        <!-- Форма для обновления товара -->
+        <h3>Update Product</h3>
+        <form id="updateForm">
+            <input type="text" id="updateProductName" placeholder="Product Name">
+            <input type="number" id="updateProductPrice" placeholder="Product Price">
+            <input type="url" id="updateProductImage" placeholder="Product Image URL">
+            <input type="url" id="updateProductUrl" placeholder="Product URL" required>
+            <button type="button" onclick="updateProduct()">Update</button>
+        </form>
 
         <button onclick="readProducts()">Refresh List</button>
     </section>
