@@ -1,4 +1,4 @@
-const API = "http://localhost:5000";
+const API = "https://software-store.onrender.com";
 
 
 window.addToCart = async function addToCart(productId, name, price, image_url, url) {
