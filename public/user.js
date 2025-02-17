@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000";
+const API_URL = "https://software-store.onrender.com";
 
 // 📌 Регистрация (Signup)
 async function signup() {
