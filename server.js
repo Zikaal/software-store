@@ -269,5 +269,4 @@ app.delete("/cart/:userId/:productId", async (req, res) => {
 });
 
 // 📌 Запуск сервера
-const PORT = 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(process.env.PORT, () => console.log(`🚀 Server running on port ${PORT}`));
