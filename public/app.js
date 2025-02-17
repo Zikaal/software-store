@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/product"; 
+const API_URL = "https://software-store.onrender.com/product"; 
 
 async function createProduct() {
     const token = localStorage.getItem("token");
