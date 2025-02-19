@@ -96,7 +96,7 @@ async function readProducts() {
     const productsDiv = document.getElementById("products");
     productsDiv.innerHTML = "";
 
-    const role = localStorage.getItem("role");
+    const isAdmin = localStorage.getItem("isAdmin") === 'true';
 
     products.forEach(product => {
         productsDiv.innerHTML += `
@@ -106,7 +106,7 @@ async function readProducts() {
                 <p>Price: ${product.price}</p>
                 <a href="${product.url}" target="_blank">View Product</a><br>
                 <button onclick="addToCart('${product._id}', '${product.name}', '${product.price}', '${product.image_url}', '${product.url}')">Add to Cart</button>
-                ${role === 'admin' ? `<button onclick="deleteProduct('${product._id}')">Delete</button>` : ''}
+                ${isAdmin ? `<button onclick="deleteProduct('${product._id}')">Delete</button>` : ''}
             </div>
         `;
     });
@@ -115,9 +115,11 @@ async function readProducts() {
 document.addEventListener("DOMContentLoaded", () => {
     readProducts();
 
-    const role = localStorage.getItem("role");
+    const isAdmin = localStorage.getItem("isAdmin") === 'true';
     const adminSection = document.getElementById("adminSection");
-    if (role === "admin") {
+    if (isAdmin) {
         adminSection.style.display = "block";
+    } else {
+        adminSection.style.display = "none";
     }
 });
