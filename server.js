@@ -39,7 +39,7 @@ function authenticate(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    if (req.user.role !== 'admin') {
+    if (!req.user.isAdmin) {
         return res.status(403).json({ error: 'Admin access only' });
     }
     next();
@@ -70,7 +70,7 @@ app.post("/login", async (req, res) => {
     
         if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     
-        const token = jwt.sign({ id: user._id, isAdmin }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id, role: isAdmin ? 'admin' : 'user' }, process.env.JWT_SECRET, { expiresIn: '1h' });
     
         res.json({ token, isAdmin, userId: user._id });
     });
